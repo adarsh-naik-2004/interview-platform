@@ -1,0 +1,136 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import Interview from '../models/Interview.js';
+
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-1.5-flash",
+  generationConfig: {
+    temperature: 0.7,
+    maxOutputTokens: 1000,
+  },
+});
+
+// Helper function to parse Gemini response
+const parseGeminiResponse = (textResponse) => {
+  try {
+    const jsonString = textResponse
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    return JSON.parse(jsonString);
+  } catch (error) {
+    throw new Error(`Failed to parse AI response: ${error.message}`);
+  }
+};
+
+// Controller functions
+export const evaluateResponse = async (req, res) => {
+  const { question, response } = req.body;
+  
+  if (!question || !response) {
+    return res.status(400).json({ error: 'Missing question or response' });
+  }
+
+  try {
+    const prompt = generateEvaluationPrompt(
+      question,
+      response,
+      req.user.experienceLevel || 'mid-level' // Default value
+    );
+
+    const result = await model.generateContent(prompt);
+    const text = await result.response.text();
+    const feedback = parseGeminiResponse(text);
+
+    res.json({
+      ...feedback,
+      question,
+      response,
+      evaluationDate: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Evaluation Error:', error);
+    res.status(500).json({
+      error: 'AI evaluation failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// Remaining controller functions unchanged
+export const saveInterview = async (req, res) => { /* ... */ };
+export const getInterviewHistory = async (req, res) => { /* ... */ };
+
+
+export const generateQuestions = async (req, res) => {
+    const { jobRole, experienceLevel } = req.body;
+  
+    try {
+      const prompt = `Generate 5 technical interview questions for a 
+        ${experienceLevel} ${jobRole} position. Format as JSON array:
+        ["question1", "question2", ...]`;
+  
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      // Clean response
+      const jsonString = text
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .trim();
+  
+      res.json(JSON.parse(jsonString));
+  
+    } catch (error) {
+      console.error('Generation Error:', error);
+      res.status(500).json({
+        error: 'Question generation failed',
+        details: error.message
+      });
+    }
+  };
+
+
+  export const getInterviews = async (req, res) => {
+    try {
+      const interviews = await Interview.find({ user: req.user._id });
+      res.json(interviews);
+    } catch (err) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  };
+// Helper function
+const generateEvaluationPrompt = (question, response, experienceLevel) => `
+  [ROLE]
+  You are an expert interview coach analyzing a technical interview response.
+  The candidate is applying for a ${experienceLevel} position.
+
+  [INSTRUCTIONS]
+  1. Analyze the response for technical accuracy and communication skills
+  2. Identify key strengths and areas for improvement
+  3. Score the response from 0-100 considering experience level
+  4. Provide actionable suggestions
+  5. Analyze keywords
+
+  [RESPONSE FORMAT]
+  {
+    "strengths": ["3 concise bullet points"],
+    "weaknesses": ["3 concise bullet points"],
+    "score": "number 0-100",
+    "suggestions": ["3 actionable items"],
+    "keywordAnalysis": {
+      "relevant": ["top 5 technical terms"],
+      "irrelevant": ["top 5 filler/unrelated words"]
+    }
+  }
+
+  [QUESTION]
+  ${question}
+
+  [CANDIDATE RESPONSE]
+  ${response}
+`;
