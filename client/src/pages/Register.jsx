@@ -1,25 +1,23 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import api from '../utils/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import api from '../utils/api';
 
 export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
-    experienceLevel: 'entry',
-    jobRole: 'software-engineer'
   });
   
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
     
     try {
       // Register user
@@ -29,15 +27,15 @@ export default function Register() {
       localStorage.setItem('token', token);
       
       // Fetch user details
-      const { data: user } = await api.get('/api/auth/me');
+      const { data: user } = await api.get('/api/auth/check');
       login(user);
       
-      toast.success('Registration successful!');
-      navigate('/');
+      toast.success('Registration successful! 🎉');
+      navigate('/dashboard'); // Redirect to dashboard
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Registration failed');
+      toast.error(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -49,107 +47,94 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <h2 className="text-3xl font-bold text-center">Create Account</h2>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium">
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                required
-                className="mt-1 block w-full rounded border-gray-300"
-                value={formData.username}
-                onChange={handleChange}
-              />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-blue-600 mb-2">Get Started</h1>
+          <p className="text-gray-600">Create your account to unlock all features</p>
+        </div>
+        
+        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 transition-all duration-300 hover:shadow-2xl">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  required
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Enter your username"
+                  value={formData.username}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  required
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                className="mt-1 block w-full rounded border-gray-300"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-75"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating Account...
+                </>
+              ) : 'Create Account'}
+            </button>
+          </form>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                className="mt-1 block w-full rounded border-gray-300"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="experienceLevel" className="block text-sm font-medium">
-                Experience Level
-              </label>
-              <select
-                id="experienceLevel"
-                name="experienceLevel"
-                className="mt-1 block w-full rounded border-gray-300"
-                value={formData.experienceLevel}
-                onChange={handleChange}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{' '}
+              <Link 
+                to="/login" 
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
-                <option value="entry">Entry Level</option>
-                <option value="mid">Mid Level</option>
-                <option value="senior">Senior Level</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="jobRole" className="block text-sm font-medium">
-                Target Job Role
-              </label>
-              <select
-                id="jobRole"
-                name="jobRole"
-                className="mt-1 block w-full rounded border-gray-300"
-                value={formData.jobRole}
-                onChange={handleChange}
-              >
-                <option value="software-engineer">Software Engineer</option>
-                <option value="frontend-engineer">Frontend Engineer</option>
-                <option value="backend-engineer">Backend Engineer</option>
-                <option value="fullstack-engineer">Fullstack Engineer</option>
-              </select>
-            </div>
+                Log in here
+              </Link>
+            </p>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400"
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm">
-          Already have an account?{' '}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Log in
-          </a>
-        </p>
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+// src/contexts/AuthProvider.jsx
 import { useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../utils/api';
@@ -10,27 +11,42 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let isMounted = true;
     const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // no token → skip check, go straight to not authenticated
+        if (isMounted) setLoading(false);
+        return;
+      }
+
       try {
         const { data } = await api.get('/api/auth/check');
         if (isMounted) setUser(data);
       } catch {
+        // invalid/expired token
+        localStorage.removeItem('token');
         if (isMounted) setUser(null);
       } finally {
         if (isMounted) setLoading(false);
       }
     };
+
     checkAuth();
-    return () => { isMounted = false };
+    return () => { isMounted = false; };
   }, []);
-  
+
   const login = async (email, password) => {
     try {
       const { data } = await api.post('/api/auth/login', { email, password });
       localStorage.setItem('token', data.token);
-      setUser(data.user);
+
+      // now that token is set, fetch user
+      const { data: userData } = await api.get('/api/auth/check');
+      setUser(userData);
+
       toast.success('Login successful!');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Login failed');
+      throw err;  // re‑throw so callers know it failed
     }
   };
 

@@ -26,7 +26,7 @@ export default function ProgressChart({ data }) {
     datasets: [
       {
         label: 'Scores',
-        data: data?.map(i => i.overallScore) || [],
+        data: data?.map(i => i.score) || [], // Changed from overallScore to score
         borderColor: '#3b82f6',
         tension: 0.1,
       },
