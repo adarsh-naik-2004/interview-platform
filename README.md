@@ -53,7 +53,7 @@ A full-stack web application to simulate job interviews using AI, track your per
 
 ```bash
 git clone https://github.com/adarsh-naik-2004/interview-platform.git
-cd interview-prep-platform
+cd interview-platform
 ```
 ### 2. Setup the Backend
 ```bash
