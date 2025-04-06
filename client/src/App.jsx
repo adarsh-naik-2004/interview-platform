@@ -10,8 +10,8 @@ import Loader from "./components/Loader";
 import Landing from "./pages/Landing";
 import InterviewHistory from "./pages/InterviewHistory";
 import InterviewSetup from "./components/InterviewSetup";
+import { Toaster } from "react-hot-toast"; // ✅ Import Toaster
 
-// Create a client
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -19,6 +19,25 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
+          {/* ✅ Add Toaster at the root */}
+          <Toaster 
+            position="top-right" 
+            toastOptions={{
+              success: {
+                style: {
+                  background: "#e0f8ea",
+                  color: "#065f46",
+                },
+              },
+              error: {
+                style: {
+                  background: "#ffe4e6",
+                  color: "#b91c1c",
+                },
+              },
+            }}
+          />
+          
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
@@ -43,7 +62,7 @@ function RequireAuth() {
 
   if (loading) return <Loader />;
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   return <Outlet />;

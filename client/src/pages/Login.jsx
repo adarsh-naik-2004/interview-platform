@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 export default function Login() {
@@ -11,12 +10,11 @@ export default function Login() {
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await authLogin(email, password);  // Let context handle everything
-      toast.success('Login successful!');
+      await authLogin(email, password);
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Login failed');
@@ -26,14 +24,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to continue your interview preparation</p>
-        </div>
-        
-        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 transition-all duration-300 hover:shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-blue-100 to-white px-4 relative overflow-hidden">
+      {/* Blobs */}
+      <div className="absolute top-[-4rem] left-[-4rem] w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
+      <div className="absolute bottom-[-4rem] right-[-4rem] w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
+
+      <div className="w-full max-w-md z-10">
+        <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl p-10 sm:p-12">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-indigo-700">Welcome Back 👋</h1>
+            <p className="text-sm text-gray-600 mt-2">Sign in to continue your preparation</p>
+          </div>
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -43,13 +45,13 @@ export default function Login() {
                 type="email"
                 id="email"
                 required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 transition-all"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
@@ -58,7 +60,7 @@ export default function Login() {
                 type="password"
                 id="password"
                 required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 transition-all"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -68,7 +70,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+              className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -78,20 +80,20 @@ export default function Login() {
                   </svg>
                   Signing In...
                 </>
-              ) : 'Sign In'}
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link 
-                to="/register" 
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-              >
-                Create account
-              </Link>
-            </p>
+          <div className="mt-6 text-center text-sm text-gray-600">
+            Don't have an account?{' '}
+            <Link
+              to="/register"
+              className="font-medium text-indigo-600 hover:text-indigo-500 transition"
+            >
+              Create account
+            </Link>
           </div>
         </div>
       </div>

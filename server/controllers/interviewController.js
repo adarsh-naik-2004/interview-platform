@@ -117,18 +117,17 @@ export const saveInterview = async (req, res) => {
 };
 
 export const generateQuestions = async (req, res) => {
-  const { jobRole, experienceLevel } = req.body;
+  const { jobRole, experienceLevel, questionCount = 5 } = req.body;
 
   try {
-    const prompt = `Generate 5 technical interview questions for a 
-        ${experienceLevel} ${jobRole} position. Format as JSON array:
-        ["question1", "question2", ...]`;
+    const prompt = `Generate ${questionCount} technical interview questions for a 
+      ${experienceLevel} ${jobRole} position. Format as JSON array:
+      ["question1", "question2", ...]`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    // Clean response
     const jsonString = text
       .replace(/```json/g, "")
       .replace(/```/g, "")
@@ -143,6 +142,7 @@ export const generateQuestions = async (req, res) => {
     });
   }
 };
+
 
 export const getInterviews = async (req, res) => {
   try {
